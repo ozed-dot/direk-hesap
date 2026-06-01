@@ -1496,14 +1496,16 @@ function createPdfReport(){
   report+="</section>";
 
   byId("printReport").innerHTML=report;
-  // Android: save as HTML, Web: print
-  if(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
-    var fn2=byId("fn").value||"Direk";
-    var fullHtml='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+fn2+' Raporu</title></head><body>'+report+'</body></html>';
-    saveFileToDevice(fn2+"_Raporu.html", fullHtml, "text/html;charset=utf-8;");
-  } else {
-    setTimeout(function(){ window.print(); }, 250);
-  }
+  var fn2=byId("fn").value||"Direk";
+  var fullHtml='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+fn2+' Raporu</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#111}</style></head><body>'+report+'</body></html>';
+  var dataUri = "data:text/html;charset=utf-8," + encodeURIComponent(fullHtml);
+  var a = document.createElement("a");
+  a.href = dataUri;
+  a.download = fn2+"_Raporu.html";
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ document.body.removeChild(a); }, 100);
 }
 
 // ── VECTOR FILTER ──
@@ -2053,6 +2055,21 @@ function closeReportMenuOutside(e){
   var menu=document.getElementById("reportMenu");
   if(btn&&!btn.contains(e.target)&&menu&&!menu.contains(e.target)) closeReportMenu();
 }
+function saveFileToDevice(filename, textContent, mimeType){
+  try{
+    var dataUri = "data:"+mimeType+";charset=utf-8,"+encodeURIComponent(textContent);
+    var a = document.createElement("a");
+    a.href = dataUri;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ document.body.removeChild(a); }, 200);
+  } catch(e){
+    alert("Kaydetme hatası: "+e.message);
+  }
+}
+
 function exportExcel(){
   // CSV formatında indirme (Excel'de açılır)
   try{
